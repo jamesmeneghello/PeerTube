@@ -1,0 +1,43 @@
+version: "3.4"
+
+services:
+  peertube:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dev
+    ports:
+      - "8080:9000"
+      - "3000:3000"
+    volumes:
+      - pt-data:/data
+      - ./:/app:delegated
+      - pt-node-modules:/app/node_modules:delegated
+    environment: 
+      NODE_ENV: test
+      NODE_CONFIG_DIR: /app/config
+      PEERTUBE_REDIS_HOSTNAME: redis
+      PEERTUBE_DB_HOSTNAME: postgres
+    depends_on:
+      - postgres
+      - redis
+    restart: "always"
+
+  postgres:
+    image: postgres:10-alpine
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+      - ./support/docker/dev/setup_postgres.sql:/docker-entrypoint-initdb.d/1-setup.sql
+    restart: "always"
+
+  redis:
+    image: redis:4-alpine
+    volumes:
+      - redis-data:/data
+    restart: "always"
+
+volumes:
+  redis-data:
+  pg-data:
+  pt-data:
+  pt-node-modules:

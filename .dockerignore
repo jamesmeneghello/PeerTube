@@ -1,5 +1,6 @@
 *.swp
-.git
+# we can't ignore the git folder, because the build process relies on it
+# .git
 .github
 support/doc
 support/nginx
