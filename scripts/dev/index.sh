@@ -2,6 +2,27 @@
 
 set -eu
 
+yarn install --pure-lockfile
+
+if [ ! -f "./client/dist/en-US/index.html" ]; then
+  echo "client/dist/en-US/index.html does not exist, compile client files..."
+  npm run build:client -- --light
+fi
+
+# Copy locales
+mkdir -p "./client/dist"
+rm -rf "./client/dist/locale"
+cp -r "./client/src/locale" "./client/dist/locale"
+
+rm -rf "./dist"
+
+mkdir "./dist"
+cp "./tsconfig.json" "./dist"
+
+npm run tsc -- --incremental --sourceMap
+cp -r ./server/static ./server/assets ./dist/server
+
 NODE_ENV=test npm run concurrently -- -k \
-  "npm run dev:client" \
-  "npm run dev:server"
+  "npm run nodemon -- --signal SIGHUP --delay 1 --watch ./dist dist/server" \
+  "npm run tsc -- --incremental --sourceMap --preserveWatchOutput -w" \
+  "cd client && npm run ng -- serve --proxy-config proxy.config.json --hmr --configuration hmr --host 0.0.0.0 --disable-host-check --port 3000"

@@ -21,5 +21,5 @@ npm run tsc -- --incremental --sourceMap
 cp -r ./server/static ./server/assets ./dist/server
 
 NODE_ENV=test npm run concurrently -- -k \
-  "npm run nodemon -- --delay 1 --watch ./dist dist/server" \
+  "npm run nodemon -- --signal SIGHUP --delay 1 --watch ./dist dist/server" \
   "npm run tsc -- --incremental --sourceMap --preserveWatchOutput -w"
